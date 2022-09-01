@@ -1,19 +1,19 @@
 package com.seif.learningcompose
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
+import androidx.compose.material.*
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -36,6 +36,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 
@@ -43,8 +45,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
         setContent { // has all the composables that it should draw
+            /*
             Column(modifier = Modifier.fillMaxSize()) {
                 val colorState = remember { // when this box is recomposed so we don't want to reset this value
                         mutableStateOf(Color.Yellow) // external state
@@ -64,6 +66,57 @@ class MainActivity : ComponentActivity() {
                         .background(colorState.value)
                 ) {
 
+                }                
+            }
+             */
+            Snackbar() {
+                // we can use this SnackBar if we want to have full control on it (duration, where to show,...)
+                Text(text = "Hello Seif")
+            }
+
+            val scaffoldState =
+                rememberScaffoldState() // will give us the default state of that scaffold
+            var textFieldState: String by remember {
+                mutableStateOf("")
+            }
+            val scope = rememberCoroutineScope()
+
+            Scaffold(
+                modifier = Modifier.fillMaxWidth(),
+                scaffoldState = scaffoldState
+            ) {
+                // it's a layout compose which will make it easy for us to include already existing material design components in compose
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 30.dp)
+                ) {
+                    TextField(
+                        value = textFieldState,
+                        label = {
+                            Text(text = "Enter Your Greeting Name")
+                        },
+                        onValueChange = {
+                            // called whenever text value changes (every character changed)
+                            textFieldState = it
+                        },
+                        singleLine = true, // to have a single line.
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = {
+                        scope.launch(Dispatchers.Main) {
+                            scaffoldState.snackbarHostState.showSnackbar(
+                                "Hello $textFieldState",
+                                duration = SnackbarDuration.Short
+                            )
+                        }
+                    }) {
+                        // content of the button
+                        Text(text = "Greeting Me")
+                    }
                 }
             }
         }
@@ -155,4 +208,15 @@ fun DefaultPreview() { // we can preview our composable
 // it always starts from top left corner of our composable
 
 // recomposed: Means that the composable will be redrawn again
+// state: it's just a value that can change over time in the end
 // with larger apps we will handle the states in viewModel
+
+// the second example in state is called: State hoisting
+// State hoisting in Compose is a pattern of moving state to a composable's caller to make a composable stateless.
+// The general pattern for state hoisting in Jetpack Compose is to replace the state variable with two parameters:
+
+// it provides a layout which will make it easy for us to include already existing material design components in compose (as toolbar, navigationDrawer, snackBar)
+
+/** Warning:
+ * Never launch a coroutine directly in the composable, it's only ok in callbacks such as onClickListener
+ **/

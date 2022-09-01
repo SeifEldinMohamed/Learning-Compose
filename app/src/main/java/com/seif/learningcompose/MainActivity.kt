@@ -12,6 +12,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -34,58 +36,58 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.random.Random
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val fontFamily = FontFamily(
-            Font(R.font.lexend_thin, FontWeight.Thin),
-            Font(R.font.lexend_light, FontWeight.Light),
-            Font(R.font.lexend_extra_light, FontWeight.ExtraLight),
-            Font(R.font.lexend_black, FontWeight.Black),
-            Font(R.font.lexend_bold, FontWeight.Bold),
-            Font(R.font.lexend_semi_bold, FontWeight.SemiBold),
-            Font(R.font.lexend_extra_bold, FontWeight.ExtraBold),
-            Font(R.font.lexend_medium, FontWeight.Medium),
-            Font(R.font.lexend_regular, FontWeight.Normal),
-        )
+
+
         setContent { // has all the composables that it should draw
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFF101010))
-            ) {
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                color = Color.Green,
-                            )
-                        ) {
-                            append('J')
-                        }
-                        append("etpack ")
-                        withStyle(
-                            style = SpanStyle(
-                                color = Color.Green,
-                            )
-                        ) {
-                            append('C')
-                        }
-                        append("ompose")
-                    },
-                    color = Color.White,
-                    fontSize = 30.sp,
-                    fontFamily = fontFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontStyle = FontStyle.Italic,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.TopCenter),
-                    textDecoration = TextDecoration.Underline
-                )
+            Column(modifier = Modifier.fillMaxSize()) {
+                val colorState = remember { // when this box is recomposed so we don't want to reset this value
+                        mutableStateOf(Color.Yellow) // external state
+                    }
+                ColorBox(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize()
+                ){
+                    // this lambda block will be called when the colorState Changed (click on this box)
+                    colorState.value = it
+                }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize()
+                        .background(colorState.value)
+                ) {
+
+                }
             }
         }
+    }
+}
+
+@Composable
+fun ColorBox(
+    modifier: Modifier = Modifier,
+    updateColor: (Color) -> Unit
+) {
+    Box(modifier = modifier
+        .background(Color.Red)
+        .clickable {
+            updateColor(
+                Color(
+                    Random.nextFloat(),
+                    Random.nextFloat(),
+                    Random.nextFloat(),
+                    alpha = 1f
+                )
+            )
+        }
+    ) {
     }
 }
 
@@ -145,13 +147,12 @@ fun Greeting(name: String) {
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() { // we can preview our composable
-    val painters = painterResource(id = R.drawable.nyc_in_snow)
-    val description = "New York City in snow"
-    val title = "New York City in snow Image"
-    ImageCard(painter = painters, contentDescription = description, title = title)
 
 }
 
 // there is no margin in compose as we can do all the work with padding
 // offset(): it will offset the element just like margin does it but it won't push away other elements,
 // it always starts from top left corner of our composable
+
+// recomposed: Means that the composable will be redrawn again
+// with larger apps we will handle the states in viewModel

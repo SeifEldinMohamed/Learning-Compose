@@ -4,12 +4,12 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +47,7 @@ class MainActivity : ComponentActivity() {
 
         setContent { // has all the composables that it should draw
             /*
+            // states in compose
             Column(modifier = Modifier.fillMaxSize()) {
                 val colorState = remember { // when this box is recomposed so we don't want to reset this value
                         mutableStateOf(Color.Yellow) // external state
@@ -69,6 +70,8 @@ class MainActivity : ComponentActivity() {
                 }                
             }
              */
+            /*
+           //  buttons, textFields and sncakBars in compose
             Snackbar() {
                 // we can use this SnackBar if we want to have full control on it (duration, where to show,...)
                 Text(text = "Hello Seif")
@@ -119,6 +122,63 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+
+             */
+
+            LazyColumnWithIndex()
+        }
+    }
+}
+
+@Composable
+fun LazyColumnWithIndex(){
+    LazyColumn(modifier = Modifier.padding(top = 10.dp)) {
+        itemsIndexed(
+            listOf("Hello", "Seif", "from", "Jetpack","Compose")
+        ) { index, string ->
+            Text(
+                text = "$index- $string",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 18.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun LazyColumn(){
+    LazyColumn(modifier = Modifier.padding(top = 10.dp)) {
+        items(1000) {
+            Text(
+                text = "text $it",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 18.dp)
+            )
+        }
+    }
+}
+@Composable
+fun ScrollableColumn() {
+    val scrollState = rememberScrollState()
+    Column(modifier = Modifier.verticalScroll(scrollState)) {
+        for (i in 0..50) {
+            Text(
+                text = "text $i",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 18.dp)
+            )
         }
     }
 }
@@ -220,3 +280,6 @@ fun DefaultPreview() { // we can preview our composable
 /** Warning:
  * Never launch a coroutine directly in the composable, it's only ok in callbacks such as onClickListener
  **/
+
+// Modifier.verticalScroll() : we nedd a scroll state so we can manipulate the current scroll position to programmatically scroll in our column
+// lazy columns : lazily loads this items as we scroll

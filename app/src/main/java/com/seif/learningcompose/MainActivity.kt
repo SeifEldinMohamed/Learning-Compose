@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.res.fontResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -34,8 +35,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintSet
+import androidx.constraintlayout.compose.Dimension
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -125,16 +130,107 @@ class MainActivity : ComponentActivity() {
 
              */
 
-            LazyColumnWithIndex()
+            PhilipConstraintLayout()
         }
     }
 }
 
 @Composable
-fun LazyColumnWithIndex(){
+fun DecoupledConstraintLayout() {
+    BoxWithConstraints {
+        val constraints = if (minWidth < 600.dp) {
+            decoupledConstraints(margin = 16.dp) // Portrait constraints
+        } else {
+            decoupledConstraints(margin = 162.dp) // Landscape constraints
+        }
+
+        ConstraintLayout(constraints) {
+            Button(
+                onClick = { /* Do something */ },
+                modifier = Modifier.layoutId("button")
+            ) {
+                Text("Button")
+            }
+
+            Text("Text", Modifier.layoutId("text"))
+        }
+    }
+}
+
+private fun decoupledConstraints(margin: Dp): ConstraintSet {
+    return ConstraintSet {
+        val button = createRefFor("button")
+        val text = createRefFor("text")
+
+        constrain(button) {
+            top.linkTo(parent.top, margin = margin)
+        }
+        constrain(text) {
+            top.linkTo(button.bottom, margin)
+        }
+    }
+}
+
+@Composable
+fun ConstraintLayoutContent() {
+    ConstraintLayout {
+        // Create references for the composables to constrain
+        val (button, text) = createRefs()
+
+        Button(
+            onClick = { /* Do something */ },
+            // Assign reference "button" to the Button composable
+            // and constrain it to the top of the ConstraintLayout
+            modifier = Modifier.constrainAs(button) {
+                top.linkTo(parent.top, margin = 16.dp)
+            }
+        ) {
+            Text("Button")
+        }
+
+        // Assign reference "text" to the Text composable
+        // and constrain it to the bottom of the Button composable
+        Text("Text", Modifier.constrainAs(text) {
+            top.linkTo(button.bottom, margin = 16.dp)
+        })
+    }
+}
+
+@Composable
+fun PhilipConstraintLayout(){
+    val constraints = ConstraintSet {
+        val greenBox = createRefFor("greenBox")
+        val redBox = createRefFor("redBox")
+        val guideline = createGuidelineFromTop(0.5f)
+        constrain(greenBox) {
+            top.linkTo(guideline)
+            start.linkTo(parent.start)
+            width = Dimension.value(100.dp)
+            height = Dimension.value(100.dp)
+        }
+        constrain(redBox) {
+            top.linkTo(parent.top)
+            start.linkTo(greenBox.end)
+            width = Dimension.value(100.dp)
+            height = Dimension.value(100.dp)
+        }
+        // createHorizontalChain(greenBox, redBox)
+    }
+    ConstraintLayout(constraints, modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier
+            .background(Color.Green)
+            .layoutId("greenBox"))
+        Box(modifier = Modifier
+            .background(Color.Red)
+            .layoutId("redBox"))
+    }
+}
+
+@Composable
+fun LazyColumnWithIndex() {
     LazyColumn(modifier = Modifier.padding(top = 10.dp)) {
         itemsIndexed(
-            listOf("Hello", "Seif", "from", "Jetpack","Compose")
+            listOf("Hello", "Seif", "from", "Jetpack", "Compose")
         ) { index, string ->
             Text(
                 text = "$index- $string",
@@ -150,7 +246,7 @@ fun LazyColumnWithIndex(){
 }
 
 @Composable
-fun LazyColumn(){
+fun LazyColumn() {
     LazyColumn(modifier = Modifier.padding(top = 10.dp)) {
         items(1000) {
             Text(
@@ -165,6 +261,7 @@ fun LazyColumn(){
         }
     }
 }
+
 @Composable
 fun ScrollableColumn() {
     val scrollState = rememberScrollState()
@@ -283,3 +380,55 @@ fun DefaultPreview() { // we can preview our composable
 
 // Modifier.verticalScroll() : we nedd a scroll state so we can manipulate the current scroll position to programmatically scroll in our column
 // lazy columns : lazily loads this items as we scroll
+
+// fullScreen: WindowCompat.setDecorFitsSystemWindows(window, false)
+
+// ConstraintLayout in Compose works in the following way using a DSL:
+//
+// Create references for each composable in the ConstraintLayout using the createRefs() or createRefFor()
+// Constraints are provided using the constrainAs() modifier, which takes the reference as a parameter and lets you specify its constraints in the body lambda.
+// Constraints are specified using linkTo() or other helpful methods.
+// parent is an existing reference that can be used to specify constraints towards the ConstraintLayout composable itself.
+
+// Dimension.fillToConstraints == 0.dp
+// createGuidelineFromStart() : Vertical GuideLine form start
+// createGuidelineFromTop() : Horizontal GuideLine form top
+/**
+// Create guideline from the start of the parent at 10% the width of the Composable
+val startGuideline = createGuidelineFromStart(0.1f)
+// Create guideline from the end of the parent at 10% the width of the Composable
+val endGuideline = createGuidelineFromEnd(0.1f)
+//  Create guideline from 16 dp from the top of the parent
+val topGuideline = createGuidelineFromTop(16.dp)
+//  Create guideline from 16 dp from the bottom of the parent
+val bottomGuideline = createGuidelineFromBottom(16.dp)
+ **/
+
+// Barriers:
+// Barriers reference multiple composables to create a virtual guideline based on the most
+// extreme widget on the specified side.
+/** val topBarrier = createTopBarrier(button, text) **/
+
+// Chains:
+// Chains provide group-like behavior in a single axis (horizontally or vertically) .
+// The other axis can be constrained independently.
+/**
+val verticalChain = createVerticalChain(button, text, chainStyle = ChainStyle.Spread)
+val horizontalChain = createHorizontalChain(button, text)
+ **/
+
+// The chain can then be used in the Modifier.constrainAs() block.
+//
+// A chain can be configured with different ChainStyles, which decide how to deal with the space surrounding a composable, such as:
+//
+// ChainStyle.Spread: Space is distributed evenly across all the composables, including free space before the first composable and after the last composable.
+// ChainStyle.SpreadInside: Space is distributed evenly across the all composables, without any free space before the first composable or after the last composable.
+// ChainStyle.Packed: Space is distributed before the first and after the last composable, composables are packed together without space in between each other.
+
+// Decoupled API
+//In the ConstraintLayout example, constraints are specified inline, with a modifier in the composable they're applied to. However, there are situations when it's preferable to decouple the constraints from the layouts they apply to. For example, you might want to change the constraints based on the screen configuration, or animate between two constraint sets.
+//
+//For cases like these, you can use ConstraintLayout in a different way:
+//
+//Pass in a ConstraintSet as a parameter to ConstraintLayout.
+//Assign references created in the ConstraintSet to composables using the layoutId modifier.

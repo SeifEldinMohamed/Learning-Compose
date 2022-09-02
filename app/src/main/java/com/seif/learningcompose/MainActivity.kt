@@ -154,6 +154,7 @@ fun CircularProgressBar(
     animDuration: Int = 1000,
     animDelay: Int = 0
 ) {
+    /*
     var animationPlayed by remember {
         mutableStateOf(false)
     }
@@ -166,6 +167,15 @@ fun CircularProgressBar(
     )
     LaunchedEffect(key1 = true) {
         animationPlayed = true
+    }
+     */ // philip's way
+
+    val currentPercentage = remember { Animatable(0f) } // This Animatable function creates a float value holder that automatically animates its value when the value is changed via animateTo
+    LaunchedEffect(percentage) {
+        currentPercentage.animateTo(
+            percentage,
+            animationSpec = tween(durationMillis = animDuration, delayMillis = animDelay)
+        )
     }
     Box(
         contentAlignment = Alignment.Center,
@@ -188,7 +198,7 @@ fun CircularProgressBar(
             color = Color.Black,
             fontSize = fontSize,
             fontWeight = FontWeight.Bold
-            )
+        )
     }
 
 }

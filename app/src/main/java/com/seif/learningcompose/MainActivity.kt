@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -42,6 +44,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -129,9 +132,68 @@ class MainActivity : ComponentActivity() {
             }
 
              */
-
-            PhilipConstraintLayout()
+            SimpleAnimation()
         }
+    }
+
+
+}
+@Composable
+fun SimpleAnimation() {
+    var sizeSateValue by remember {
+        mutableStateOf(200.dp)
+    }
+    val size by animateDpAsState(
+        targetValue = sizeSateValue,
+
+        tween(
+            durationMillis = 2000,
+            delayMillis = 300,
+            easing = LinearOutSlowInEasing // default (control speed of the animation)
+        ) // apply a simple animation curve to our animation
+
+        /*
+        spring(
+            Spring.DampingRatioHighBouncy
+        ) // apply simple spring animation
+
+         */
+    )
+    val inflationTransition = rememberInfiniteTransition()
+    val color by inflationTransition.animateColor(
+        initialValue = Color.Red,
+        targetValue = Color.Green,
+        animationSpec = infiniteRepeatable(
+            tween(durationMillis = 2000),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+    Box(
+        modifier = Modifier
+            .size(size)
+            .background(color),
+        contentAlignment = Alignment.Center
+    ) {
+        Button(onClick = {
+            sizeSateValue += 50.dp
+        }) {
+            Text(text = "Increase Size")
+        }
+    }
+}
+
+@Composable
+fun Test() {
+    var i = 0
+    var text by remember {
+        mutableStateOf("#")
+    }
+    LaunchedEffect(key1 = true) {
+        delay(1000L)
+    }
+    Button(onClick = { text += '#' }) {
+        i++
+        Text(text = text)
     }
 }
 
@@ -197,7 +259,7 @@ fun ConstraintLayoutContent() {
 }
 
 @Composable
-fun PhilipConstraintLayout(){
+fun PhilipConstraintLayout() {
     val constraints = ConstraintSet {
         val greenBox = createRefFor("greenBox")
         val redBox = createRefFor("redBox")
@@ -217,12 +279,16 @@ fun PhilipConstraintLayout(){
         // createHorizontalChain(greenBox, redBox)
     }
     ConstraintLayout(constraints, modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier
-            .background(Color.Green)
-            .layoutId("greenBox"))
-        Box(modifier = Modifier
-            .background(Color.Red)
-            .layoutId("redBox"))
+        Box(
+            modifier = Modifier
+                .background(Color.Green)
+                .layoutId("greenBox")
+        )
+        Box(
+            modifier = Modifier
+                .background(Color.Red)
+                .layoutId("redBox")
+        )
     }
 }
 
@@ -357,7 +423,7 @@ fun Greeting(name: String) {
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() { // we can preview our composable
-
+    ConstraintLayoutContent()
 }
 
 // there is no margin in compose as we can do all the work with padding
@@ -432,3 +498,9 @@ val horizontalChain = createHorizontalChain(button, text)
 //
 //Pass in a ConstraintSet as a parameter to ConstraintLayout.
 //Assign references created in the ConstraintSet to composables using the layoutId modifier.
+
+/** Effect Handlers **/
+// side Effect: they are something that escapes the scope of a composable function (api call, counter, ... in compose fun)
+// 1- LaunchedEffect: we get coroutine scope block so we can use suspend function in it.
+/** LaunchedEffect(key1 = , block = ) **/
+// whenever this key changes (maybe a state), the LaunchedEffect will cancel this coroutine scope and relaunch it with the new value

@@ -13,7 +13,7 @@ class Variable {
         fun simulateApiCall(){
                 uiState.value = UiState(isLoading = true)
                 try {
-                   //  uiState.value = UiState(repos = createReposList())
+                     uiState.value = UiState(repos = createReposList())
                 }
                 catch (e:Exception){
                     uiState.value = UiState(error = "Error: ${e.message}")

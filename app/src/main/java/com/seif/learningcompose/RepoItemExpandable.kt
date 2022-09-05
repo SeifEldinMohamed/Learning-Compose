@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
@@ -26,11 +27,12 @@ fun RepoItemExpandable(
         .fillMaxWidth()
         .clickable {
             onItemClick(itemPosition)
-        }
+        }.padding(top = 12.dp)
     ) {
         Image(
             painter = painterResource(id = R.drawable.nyc_in_snow),
             contentDescription = "image",
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(40.dp)
                 .padding(top = 8.dp, start = 8.dp)
@@ -40,7 +42,7 @@ fun RepoItemExpandable(
             Text(text = repositoriesEntity.name)
             Spacer(modifier = Modifier.height(6.dp))
             Text(text = repositoriesEntity.author)
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             if (repositoriesEntity.isExpanded.value) {
                 Text(text = repositoriesEntity.description)

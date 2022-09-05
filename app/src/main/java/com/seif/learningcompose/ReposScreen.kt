@@ -9,20 +9,62 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.seif.learningcompose.Variable.Companion.previousSelectedPosition
-import com.seif.learningcompose.Variable.Companion.simulateApiCall
 import com.seif.learningcompose.Variable.Companion.uiState
+import kotlinx.coroutines.delay
 
 @Composable
 fun ReposListScreen() {
-    // val reposList: List<TrendingRepositoriesEntity> = createReposList()
     Column {
         OptionMenu()
+        SwipeRefreshCompose()
+
+    }
+}
+/*
+@Composable
+fun SwipeRefreshCompose() {
+    val context = LocalContext.current
+    SwipeRefresh(state = rememberSwipeRefreshState(isRefreshing = false), onRefresh = {
+        Toast.makeText(context, "refreshed", Toast.LENGTH_SHORT).show()
+    },
+        indicator = { state, refreshTrigger ->
+            SwipeRefreshIndicator(
+                state = state,
+                refreshTriggerDistance = refreshTrigger,
+                scale = true,
+                backgroundColor = Color.White
+            )
+        }
+    ) {
+
+    }
+}
+
+ */
+
+@Composable
+fun SwipeRefreshCompose() {
+    var refreshing by remember { mutableStateOf(false) }
+    LaunchedEffect(refreshing) {
+        if (refreshing) { // do your work here
+            delay(1500)
+            refreshing = false
+        }
+    }
+
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing = refreshing),
+        onRefresh = { refreshing = true },
+    ) {
         val stateValue = uiState.value
         if (stateValue.error.isNotBlank()) {
             Toast.makeText(LocalContext.current, "Error: ${stateValue.error}", Toast.LENGTH_SHORT)
@@ -35,18 +77,19 @@ fun ReposListScreen() {
                 }
             }
         }
-        if (stateValue.repos.isNotEmpty())
-            RepositoriesLazyColumn(reposList = stateValue.repos)
+        if (stateValue.repos.isNotEmpty()){
+            val reposListStateValue by rememberSaveable { // to save state when configuration changed
+                mutableStateOf(stateValue.repos)
+            }
+            RepositoriesLazyColumn(reposList = reposListStateValue)
 
+        }
     }
-    // RepositoriesLazyColumn(reposList = reposList)
 
 }
-
-
 @Composable
 fun OptionMenu() {
-    var showMenu by remember { mutableStateOf(false) }
+    var showMenu by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
 
     TopAppBar(
@@ -96,7 +139,7 @@ fun OptionMenu() {
 
 @Composable
 fun RepositoriesLazyColumn(reposList: List<TrendingRepositoriesEntity>) {
-    androidx.compose.foundation.lazy.LazyColumn(modifier = Modifier.padding(top = 10.dp)) {
+    androidx.compose.foundation.lazy.LazyColumn(modifier = Modifier.padding(horizontal = 10.dp)) {
         itemsIndexed(reposList) { index, item ->
             RepoItemExpandable(
                 repositoriesEntity = item,

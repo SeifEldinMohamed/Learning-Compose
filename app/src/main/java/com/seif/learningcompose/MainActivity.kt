@@ -135,9 +135,12 @@ class MainActivity : ComponentActivity() {
             }
 
              */
+            Variable.simulateApiCall()
 
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressBar(percentage = 0.8f, number = 100)
+               // CircularProgressBar(percentage = 0.8f, number = 100)
+               // Navigation()
+                ReposListScreen()
             }
         }
     }

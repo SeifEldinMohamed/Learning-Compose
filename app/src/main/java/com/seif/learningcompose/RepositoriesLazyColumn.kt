@@ -5,9 +5,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.seif.learningcompose.RepoItemExpandable
-import com.seif.learningcompose.TrendingRepositoriesEntity
-import com.seif.learningcompose.Variable
+
 
 @Composable
 fun RepositoriesLazyColumn(reposList: List<TrendingRepositoriesEntity>) {

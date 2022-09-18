@@ -34,13 +34,12 @@ fun OptionMenu() {
         backgroundColor = Color.White,
         actions = {
             /*
-            IconButton(onClick = {
-                Toast.makeText(context, "Favorite", Toast.LENGTH_SHORT).show()
-            }) {
-                Icon(Icons.Default.Favorite, "")
-            }
-             */
-
+ IconButton(onClick = {
+     Toast.makeText(context, "Favorite", Toast.LENGTH_SHORT).show()
+ }) {
+     Icon(Icons.Default.Favorite, "")
+ }
+  */
             IconButton(onClick = { showMenu = !showMenu }) {
                 Icon(Icons.Default.MoreVert, "")
             }

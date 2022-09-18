@@ -14,14 +14,21 @@
         android:theme="@style/Theme.LearningCompose"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.TimerActivity"
             android:exported="true"
-            android:theme="@style/Theme.LearningCompose">
+            android:label="@string/title_activity_timer"
+            android:theme="@style/Theme.LearningCompose" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.LearningCompose">
+
         </activity>
     </application>
 

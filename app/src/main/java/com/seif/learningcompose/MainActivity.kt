@@ -140,7 +140,8 @@ class MainActivity : ComponentActivity() {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                // CircularProgressBar(percentage = 0.8f, number = 100)
                // Navigation()
-                ReposListScreen()
+              //  ReposListScreen()
+                CircularProgressBar(percentage = 1f, number = 100)
             }
         }
     }
@@ -148,13 +149,13 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun CircularProgressBar(
-    percentage: Float,
+    percentage: Float, // max number is 1f (100%)
     number: Int,
     fontSize: TextUnit = 28.sp,
     radius: Dp = 50.dp,
     color: Color = Color.Green,
     strokeWidth: Dp = 8.dp,
-    animDuration: Int = 1000,
+    animDuration: Int = 2000,
     animDelay: Int = 0
 ) {
     /*

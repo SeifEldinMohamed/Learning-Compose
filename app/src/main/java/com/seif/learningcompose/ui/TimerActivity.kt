@@ -18,10 +18,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.*
 import com.seif.learningcompose.ui.ui.theme.LearningComposeTheme
 import kotlinx.coroutines.delay
 import kotlin.math.PI
@@ -48,12 +45,8 @@ class TimerActivity : ComponentActivity() {
                             inactiveBarColor = Color.Gray,
                             activeBarColor = Color.Green,
                             counterTextColor = Color.Black,
+                            counterTextSize = 44.sp,
                             modifier = Modifier.size(200.dp, 200.dp),
-                            delayTime = 500L,
-                            stopButtonColor = Color.Black,
-                            stopButtonTextColor = Color.White,
-                            startButtonColor = Color.Cyan,
-                            startButtonTextColor = Color.Black
                         )
                     }
                 }
@@ -62,16 +55,17 @@ class TimerActivity : ComponentActivity() {
     }
 }
 
-@Composable
+@androidx.compose.runtime.Composable
 fun Timer(
     totalTime: Long,
-    handleColor: Color,
+    handleColor: androidx.compose.ui.graphics.Color,
     inactiveBarColor: Color,
     activeBarColor: Color,
-    modifier: Modifier = Modifier,
+    modifier: androidx.compose.ui.Modifier = Modifier,
     counterTextColor: Color,
+    counterTextSize: androidx.compose.ui.unit.TextUnit,
     initialValue: Float = 1f,
-    strokeWidth: Dp = 5.dp,
+    strokeWidth: androidx.compose.ui.unit.Dp = 5.dp,
     delayTime: Long = 100L,
     startAngle: Float = -215f,
     sweepAngle: Float = 250f,
@@ -81,8 +75,8 @@ fun Timer(
     startButtonTextColor: Color = Color.Black
 ) {
     // size of whole composable
-    var size by remember {
-        mutableStateOf(IntSize.Zero)
+    var size by androidx.compose.runtime.remember {
+        androidx.compose.runtime.mutableStateOf(androidx.compose.ui.unit.IntSize.Zero)
     }
     // percentage value of our timer
     var value by remember {
@@ -95,28 +89,34 @@ fun Timer(
     var isTimerRunning by remember {
         mutableStateOf(false)
     }
-    LaunchedEffect(key1 = currentTime, key2 = isTimerRunning) {
+    androidx.compose.runtime.LaunchedEffect(key1 = currentTime, key2 = isTimerRunning) {
         if (currentTime > 0 && isTimerRunning) {
-            delay(delayTime)
+            kotlinx.coroutines.delay(delayTime)
             currentTime -= delayTime
             value = currentTime / totalTime.toFloat()
         }
     }
-    Box(
-        contentAlignment = Alignment.Center,
+    androidx.compose.foundation.layout.Box(
+        contentAlignment = androidx.compose.ui.Alignment.Center,
         modifier = modifier
             .onSizeChanged {
                 size = it
             }
     ) {
-        Canvas(modifier = modifier) {
+        androidx.compose.foundation.Canvas(modifier = modifier) {
             drawArc(
                 color = inactiveBarColor,
                 startAngle = startAngle,
                 sweepAngle = sweepAngle,
                 useCenter = false,
-                size = Size(size.width.toFloat(), size.height.toFloat()),
-                style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round)
+                size = androidx.compose.ui.geometry.Size(
+                    size.width.toFloat(),
+                    size.height.toFloat()
+                ),
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    strokeWidth.toPx(),
+                    cap = StrokeCap.Round
+                )
             )
             drawArc(
                 color = activeBarColor,
@@ -124,18 +124,21 @@ fun Timer(
                 sweepAngle = sweepAngle * value,
                 useCenter = false,
                 size = Size(size.width.toFloat(), size.height.toFloat()),
-                style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round)
+                style = Stroke(
+                    strokeWidth.toPx(),
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                )
             )
-            val center = Offset(size.width / 2f, size.height / 2f)
+            val center = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height / 2f)
             val beta =
-                (250f * value + 145f) * (PI / 180f).toFloat() // angle, we use * (PI / 180f) to convert it to radians
+                (250f * value + 145f) * (kotlin.math.PI / 180f).toFloat() // angle, we use * (PI / 180f) to convert it to radians
             val radius = size.width / 2f
-            val a = cos(beta) * radius // first side
-            val b = sin(beta) * radius // second side
+            val a = kotlin.math.cos(beta) * radius // first side
+            val b = kotlin.math.sin(beta) * radius // second side
 
             drawPoints(
                 listOf(Offset(center.x + a, center.y + b)),
-                pointMode = PointMode.Points,
+                pointMode = androidx.compose.ui.graphics.PointMode.Points,
                 color = handleColor,
                 strokeWidth = (strokeWidth * 3f).toPx(), // to make handle bigger than our arc
                 cap = StrokeCap.Round
@@ -143,11 +146,11 @@ fun Timer(
         }
         Text(
             text = (currentTime / 1000L).toString(),
-            fontSize = 44.sp,
-            fontWeight = FontWeight.Bold,
+            fontSize = counterTextSize,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
             color = counterTextColor
         )
-        Button(
+        androidx.compose.material.Button(
             onClick = {
                 if (currentTime <= 0L) {
                     currentTime = totalTime
@@ -157,7 +160,7 @@ fun Timer(
                 }
             },
             modifier = Modifier.align(Alignment.BottomCenter),
-            colors = ButtonDefaults.buttonColors(
+            colors = androidx.compose.material.ButtonDefaults.buttonColors(
                 backgroundColor = if (!isTimerRunning || currentTime <= 0L) {
                     startButtonColor
                 } else {
@@ -165,7 +168,7 @@ fun Timer(
                 }
             )
         ) {
-            Text(
+            androidx.compose.material.Text(
                 text = if (isTimerRunning && currentTime > 0L) "Stop"
                 else if (!isTimerRunning && currentTime == totalTime) "Start"
                 else if (!isTimerRunning && currentTime > 0L) "Resume"
@@ -200,6 +203,7 @@ fun DefaultPreview2() {
                 activeBarColor = Color.Green,
                 modifier = Modifier.size(200.dp),
                 counterTextColor = Color.Black,
+                counterTextSize = 44.sp,
                 delayTime = 500L,
                 stopButtonColor = Color.Black,
                 stopButtonTextColor = Color.White,
@@ -207,6 +211,5 @@ fun DefaultPreview2() {
                 startButtonTextColor = Color.Black
             )
         }
-
     }
 }

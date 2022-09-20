@@ -34,6 +34,7 @@ class TimerActivity : ComponentActivity() {
         setContent {
             LearningComposeTheme {
                 // A surface container using the 'background' color from the theme
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
@@ -47,7 +48,12 @@ class TimerActivity : ComponentActivity() {
                             inactiveBarColor = Color.Gray,
                             activeBarColor = Color.Green,
                             counterTextColor = Color.Black,
-                            modifier = Modifier.size(200.dp, 200.dp)
+                            modifier = Modifier.size(200.dp, 200.dp),
+                            delayTime = 500L,
+                            stopButtonColor = Color.Black,
+                            stopButtonTextColor = Color.White,
+                            startButtonColor = Color.Cyan,
+                            startButtonTextColor = Color.Black
                         )
                     }
                 }
@@ -65,7 +71,14 @@ fun Timer(
     modifier: Modifier = Modifier,
     counterTextColor: Color,
     initialValue: Float = 1f,
-    strokeWidth: Dp = 5.dp
+    strokeWidth: Dp = 5.dp,
+    delayTime: Long = 100L,
+    startAngle: Float = -215f,
+    sweepAngle: Float = 250f,
+    stopButtonColor: Color = Color.Red,
+    startButtonColor: Color = Color.Green,
+    stopButtonTextColor: Color = Color.Black,
+    startButtonTextColor: Color = Color.Black
 ) {
     // size of whole composable
     var size by remember {
@@ -84,8 +97,8 @@ fun Timer(
     }
     LaunchedEffect(key1 = currentTime, key2 = isTimerRunning) {
         if (currentTime > 0 && isTimerRunning) {
-            delay(100L)
-            currentTime -= 100L
+            delay(delayTime)
+            currentTime -= delayTime
             value = currentTime / totalTime.toFloat()
         }
     }
@@ -99,22 +112,23 @@ fun Timer(
         Canvas(modifier = modifier) {
             drawArc(
                 color = inactiveBarColor,
-                startAngle = -215f,
-                sweepAngle = 250f,
+                startAngle = startAngle,
+                sweepAngle = sweepAngle,
                 useCenter = false,
                 size = Size(size.width.toFloat(), size.height.toFloat()),
                 style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round)
             )
             drawArc(
                 color = activeBarColor,
-                startAngle = -215f,
-                sweepAngle = 250f * value,
+                startAngle = startAngle,
+                sweepAngle = sweepAngle * value,
                 useCenter = false,
                 size = Size(size.width.toFloat(), size.height.toFloat()),
                 style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round)
             )
             val center = Offset(size.width / 2f, size.height / 2f)
-            val beta = (250f * value + 145f) * (PI / 180f).toFloat() // angle, we use * (PI / 180f) to convert it to radians
+            val beta =
+                (250f * value + 145f) * (PI / 180f).toFloat() // angle, we use * (PI / 180f) to convert it to radians
             val radius = size.width / 2f
             val a = cos(beta) * radius // first side
             val b = sin(beta) * radius // second side
@@ -145,16 +159,21 @@ fun Timer(
             modifier = Modifier.align(Alignment.BottomCenter),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = if (!isTimerRunning || currentTime <= 0L) {
-                    Color.Green
+                    startButtonColor
                 } else {
-                    Color.Red
+                    stopButtonColor
                 }
             )
         ) {
             Text(
                 text = if (isTimerRunning && currentTime > 0L) "Stop"
-                else if (!isTimerRunning && currentTime > 0L) "Start"
-                else "Restart"
+                else if (!isTimerRunning && currentTime == totalTime) "Start"
+                else if (!isTimerRunning && currentTime > 0L) "Resume"
+                else "Restart",
+                color = if (isTimerRunning && currentTime > 0L) stopButtonTextColor
+                else if (!isTimerRunning && currentTime == totalTime) startButtonTextColor
+                else if (!isTimerRunning && currentTime > 0L) startButtonTextColor
+                else startButtonTextColor
             )
         }
     }
@@ -180,7 +199,12 @@ fun DefaultPreview2() {
                 inactiveBarColor = Color.Gray,
                 activeBarColor = Color.Green,
                 modifier = Modifier.size(200.dp),
-                counterTextColor = Color.Black
+                counterTextColor = Color.Black,
+                delayTime = 500L,
+                stopButtonColor = Color.Black,
+                stopButtonTextColor = Color.White,
+                startButtonColor = Color.Cyan,
+                startButtonTextColor = Color.Black
             )
         }
 

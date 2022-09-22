@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -17,8 +18,14 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.seif.learningcompose.ui.ui.theme.LearningComposeTheme
 import kotlinx.coroutines.delay
 import kotlin.math.PI
@@ -39,19 +46,119 @@ class TimerActivity : ComponentActivity() {
                     Box(
                         contentAlignment = Alignment.Center
                     ) {
-                        Timer(
-                            totalTime = 10 * 1000L,
-                            handleColor = Color.Green,
-                            inactiveBarColor = Color.Gray,
-                            activeBarColor = Color.Green,
-                            counterTextColor = Color.Black,
-                            counterTextSize = 44.sp,
-                            modifier = Modifier.size(200.dp, 200.dp),
-                        )
+//                        Timer(
+//                            totalTime = 10 * 1000L,
+//                            handleColor = Color.Green,
+//                            inactiveBarColor = Color.Gray,
+//                            activeBarColor = Color.Green,
+//                            counterTextColor = Color.Black,
+//                            counterTextSize = 44.sp,
+//                            modifier = Modifier.size(200.dp, 200.dp),
+//                        )
+
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun Navigation(navController: NavHostController) {
+    NavHost(navController = navController, startDestination = "home") {
+        composable("home") {
+            HomeScreen()
+        }
+        composable("chat") {
+            ChatScreen()
+        }
+        composable("settings") {
+            SettingsScreen()
+        }
+    }
+}
+
+@ExperimentalMaterialApi
+@Composable
+fun BottomNavigationBar(
+    items: List<BottomNavItem>,
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    onItemClick: (BottomNavItem) -> Unit
+) {
+    val backStackEntry = navController.currentBackStackEntryAsState()
+    BottomNavigation(
+        modifier = modifier,
+        backgroundColor = Color.DarkGray,
+        elevation = 5.dp
+    ) {
+        items.forEach { item ->
+            val selected = item.route == backStackEntry.value?.destination?.route
+            BottomNavigationItem(
+                selected = selected,
+                onClick = { onItemClick(item) },
+                selectedContentColor = Color.Green,
+                unselectedContentColor = Color.Gray,
+                icon = {
+                    Column(horizontalAlignment = CenterHorizontally) {
+                        if(item.badgeCount > 0) {
+                            BadgeBox(
+                                badgeContent = {
+                                    Text(text = item.badgeCount.toString())
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = item.name
+                                )
+                            }
+                        } else {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.name
+                            )
+                        }
+                        if(selected) {
+                            Text(
+                                text = item.name,
+                                textAlign = TextAlign.Center,
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun HomeScreen() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = "Home screen")
+    }
+}
+
+@Composable
+fun ChatScreen() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = "Chat screen")
+    }
+}
+
+@Composable
+fun SettingsScreen() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = "Settings screen")
     }
 }
 
